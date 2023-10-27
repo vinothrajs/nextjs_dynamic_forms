@@ -75,6 +75,44 @@ export default function handler(req, res) {
             },
 
           ]
+        },
+        {
+          Pageid : 3,
+          PageRoute : "New form",
+          PageName : "New form",
+          PageDesc : "New form for Placing order details",
+          css : "#EEE",
+          Form : [
+            {
+              label: 'Select Products',
+              name: 'product',
+              type: 'dropdown',
+              options: ['Product A', 'Product B', 'Product C', 'Product D'],
+            },
+            {
+              label: 'Qty',
+              name: 'name',
+              type: 'text',
+              required: true,
+              minLength: 1,
+              maxLength: 1,
+            },
+            {
+              label: 'Delivery Date',
+              name: 'date',
+              type: 'date',
+              required: true,
+            },
+            {
+              label: 'Order Details',
+              name: 'orderDetails',
+              type: 'form',
+              required: true,
+              // order_details:[{"productname":"","quantity":""}]
+            },
+           
+
+          ]
         }, 
       ];
 

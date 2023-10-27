@@ -2,19 +2,31 @@ import { useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { useFieldArray, useForm } from 'react-hook-form';
 const DynamicForm = ({ metadata , onFormSubmit}) => {
 
   const [formData, setFormData] = useState({});
+  
   const [errors, setErrors] = useState({});
+
+  const {register, handleSubmit , control} = useForm();
+  const {fields, append , remove} = useFieldArray({control, name:"Ordered Details"})
+
+  // const handleFormChange = (event, index) => {
+  //   console.log(index)
+  //   console.log(event.value);
+  // }
 
   const handleInputChange = (event) => {
     const { name, value, type, options } = event.target;
-    const newValue =
+    let newValue =
       type === 'select-multiple'
         ? Array.from(options)
             .filter((option) => option.selected)
             .map((option) => option.value)
         : value;
+      
+     
     setFormData({
       ...formData,
       [name]: newValue,
@@ -36,27 +48,37 @@ const DynamicForm = ({ metadata , onFormSubmit}) => {
     setErrors(newErrors);
   };
 
+  
  
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const formhandleSubmit = (data) => {
+    console.log("'formData",formData);
+    console.log("data",data);
+    // e.preventDefault();
     const newErrors = {};
+    let values = {
+      ...formData,
+      ...data
+    }
 
-    metadata.Form.forEach((field) => {
-      if (field.required) {
-        if (
-          (field.type !== 'multiselect' && (!formData[field.name] || formData[field.name].trim() === '')) ||
-          (field.type === 'multiselect' && (!formData[field.name] || formData[field.name].length === 0))
-        ) {
-          newErrors[field.name] = 'Field is required.';
-        }
-      }
-    });
+
+    // metadata.Form.forEach((field) => {
+    //   if (field.required) {
+    //     console.log("filed",field);
+    //     if (
+    //       (field.type !== 'multiselect' && (!formData[field.name] || formData[field.name].trim() === '')) ||
+    //       (field.type === 'multiselect' && (!formData[field.name] || formData[field.name].length === 0)) 
+    //     ) {
+    //       newErrors[field.name] = 'Field is required.';
+    //     }
+    //   }
+    // });
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
       console.log('Form is valid. Perform save operation with data:', formData);
-      onFormSubmit(formData);
+      console.log("formData",formData);
+      onFormSubmit(values);
       setFormData({});
       setErrors({});
     }
@@ -66,7 +88,7 @@ const DynamicForm = ({ metadata , onFormSubmit}) => {
  <>
     <Container>
    
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(formhandleSubmit)}>
       {metadata.Form.map((field, index) => (
         <Row className='customRow'>
           <Col>
@@ -114,7 +136,36 @@ const DynamicForm = ({ metadata , onFormSubmit}) => {
               value={formData[field.name] || ''}
               onChange={handleInputChange}
             />
-          ) : field.type === 'multiselect' ? (
+          ) 
+
+
+          : field.type === 'form' ? (
+            <div>
+
+            <button type='button'  onClick={() => append()}>Add</button>
+            {fields.map(({id}, index) => {
+              return (
+                <div key={id}>
+                  <input
+                   type="text" 
+                   {...register(`Ordered Details.${index}.status`)}
+                  />   
+                  <input
+                   type="text" 
+                   {...register(`Ordered Details.${index}.order by`)}
+                  />    
+                  <input
+                    type="date"
+                    {...register(`Ordered Details.${index}.Date`)}
+                  />            
+                  <button type='button' onClick={() => remove(index)}>Remove</button>
+                </div>              
+              )
+            })}  
+
+            </div>
+          )   
+          : field.type === 'multiselect' ? (
             <select
               name={field.name}
               multiple
