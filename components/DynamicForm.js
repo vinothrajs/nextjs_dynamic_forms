@@ -12,11 +12,6 @@ const DynamicForm = ({ metadata , onFormSubmit}) => {
   const {register, handleSubmit , control} = useForm();
   const {fields, append , remove} = useFieldArray({control, name:"Ordered Details"})
 
-  // const handleFormChange = (event, index) => {
-  //   console.log(index)
-  //   console.log(event.value);
-  // }
-
   const handleInputChange = (event) => {
     const { name, value, type, options } = event.target;
     let newValue =
@@ -90,6 +85,8 @@ const DynamicForm = ({ metadata , onFormSubmit}) => {
    
       <form onSubmit={handleSubmit(formhandleSubmit)}>
       {metadata.Form.map((field, index) => (
+        field.fields.map((field, index)=>{
+       return(
         <Row className='customRow'>
           <Col>
           <div key={index}>
@@ -140,32 +137,67 @@ const DynamicForm = ({ metadata , onFormSubmit}) => {
 
 
           : field.type === 'form' ? (
-            <div>
+            <>
+            
+             <button type='button'  onClick={() => append()}>Add</button>
+                {fields.map(({id}, index) => {                  
+                return(
+                  <div className='customForm'>
+                   
+                  <div key={id}>
+                  {field.fields.map((field,id)=>{
+                    return(
+                      <div key={id}>    
+                      <table className='table' >
+                      <thead>
+                      <tr>
+                        <th>
+                        <label htmlFor={field.name}>{field.label}</label>
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr>
+                        <td>
 
-            <button type='button'  onClick={() => append()}>Add</button>
-            {fields.map(({id}, index) => {
-              return (
-                <div key={id}>
-                  <input
-                   type="text" 
-                   {...register(`Ordered Details.${index}.status`)}
-                  />   
-                  <input
-                   type="text" 
-                   {...register(`Ordered Details.${index}.order by`)}
-                  />    
-                  <input
-                    type="date"
-                    {...register(`Ordered Details.${index}.Date`)}
-                  />            
-                  <button type='button' onClick={() => remove(index)}>Remove</button>
-                </div>              
+                        
+                      {field.type === 'text' ? (
+                          <input
+                            type="text"
+                            {...register(`Ordered Details.${index}.${field.name}`)}
+                          />
+                        ) :field.type === 'date' ? (
+                          <input
+                            type="date"
+                            {...register(`Ordered Details.${index}.${field.name}`)}
+                          />
+                        ) :field.type === 'dropdown' ? (
+                          <select
+                            {...register(`Ordered Details.${index}.${field.name}`)}
+                          ><option value="">Select...</option>
+                            {field.options.map((option, optionIndex) => (
+                              <option key={optionIndex} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        ) :null}
+                       
+                       </td>
+                        </tr>
+                      </tbody>
+                      </table>          
+                    </div>
+                    )
+                })}
+                <button type='button' onClick={() => remove(index)}>Remove</button>
+                </div>
+              </div>
               )
-            })}  
-
-            </div>
-          )   
-          : field.type === 'multiselect' ? (
+            })}           
+          </>
+             
+          ): field.type === 'multiselect' ? (
             <select
               name={field.name}
               multiple
@@ -187,6 +219,8 @@ const DynamicForm = ({ metadata , onFormSubmit}) => {
           </Col>  
        
         </Row>
+        )
+         })
       ))}
       <div className='customRow'>
           <button variant="primary" className='sm' type="submit">Submit</button>
